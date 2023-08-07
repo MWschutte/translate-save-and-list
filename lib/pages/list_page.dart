@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:translate_save_and_list/database/database_provider.dart';
-import 'package:translate_save_and_list/models/Translation.dart';
+import 'package:translate_save_and_list/mixins/language_pair_mixin.dart';
+import 'package:translate_save_and_list/mixins/translation_list_mixin.dart';
+import 'package:translate_save_and_list/models/translation.dart';
 import 'package:translate_save_and_list/models/language_pair.dart';
 
 class ListPage extends StatefulWidget {
@@ -10,15 +11,8 @@ class ListPage extends StatefulWidget {
   State<ListPage> createState() => _ListPageState();
 }
 
-class _ListPageState extends State<ListPage> {
-  List<Translation> translations = [];
-  List<LanguagePair> languagePairs = [];
+class _ListPageState extends State<ListPage> with LanguagePairMixin<ListPage>, TranslationListMixin<ListPage>{
 
-  @override
-  void initState() {
-    fetchData();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,25 +38,6 @@ class _ListPageState extends State<ListPage> {
     }
     return slivers;
   }
-
-
-
-  void fetchData() {
-    fetchLanguagePairs();
-    fetchTranslations();
-  }
-
-  Future<void> fetchLanguagePairs() => DatabaseProvider()
-      .listLanguagePairs()
-      .then((fetchedLanguagePairs) => setState(() {
-            languagePairs = fetchedLanguagePairs;
-          }));
-
-  Future<void> fetchTranslations() => DatabaseProvider()
-      .listTranslations()
-      .then((fetchedTranslations) => setState(() {
-            translations = fetchedTranslations;
-          }));
 }
 
 class TranslationListTile extends StatelessWidget {

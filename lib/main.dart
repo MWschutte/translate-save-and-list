@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:translate_save_and_list/database/database_provider.dart';
+import 'package:translate_save_and_list/models/quiz_page.dart';
 import 'package:translate_save_and_list/pages/list_page.dart';
 import 'package:translate_save_and_list/pages/translation_page.dart';
 import 'package:flutter/widgets.dart';
@@ -42,16 +43,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const List<String> _widgetTitles = <String>['Translate', 'Quiz', 'List'];
   static const List<Widget> _widgetOptions = <Widget>[
     TranslationPage(),
-    Center(
-      child: Text(
-        'Quiz',
-        style: optionStyle,
-      ),
-    ),
+    QuizPage(),
     ListPage()
   ];
 
@@ -82,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text(_widgetTitles[_selectedPageIndex]),
       ),
       body: Center(
         child: PageView(

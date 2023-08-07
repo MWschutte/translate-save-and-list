@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 import 'package:translate_save_and_list/database/database_provider.dart';
-import 'package:translate_save_and_list/models/Translation.dart';
+import 'package:translate_save_and_list/models/translation.dart';
 import 'package:translate_save_and_list/pages/select_language_page.dart';
 
 class TranslationPage extends StatefulWidget {

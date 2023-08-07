@@ -1,6 +1,6 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:translate_save_and_list/models/Translation.dart';
+import 'package:translate_save_and_list/models/translation.dart';
 import 'package:translate_save_and_list/models/language_pair.dart';
 
 class DatabaseProvider {
