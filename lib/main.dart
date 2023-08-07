@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:translate_save_and_list/database/database_provider.dart';
-import 'package:translate_save_and_list/models/quiz_page.dart';
+import 'package:translate_save_and_list/pages/quiz_page.dart';
 import 'package:translate_save_and_list/pages/list_page.dart';
 import 'package:translate_save_and_list/pages/translation_page.dart';
 import 'package:flutter/widgets.dart';
