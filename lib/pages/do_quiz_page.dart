@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:translate_save_and_list/database/database_provider.dart';
 import 'package:translate_save_and_list/models/language_pair.dart';
@@ -16,7 +18,7 @@ class DoQuizPage extends StatefulWidget {
 
 class _DoQuizPageState extends State<DoQuizPage> {
   List<Translation> quizWords = [];
-  final int numberOfQuizWords = 10;
+  int numberOfQuizWords = 10;
   final PageController _pageController = PageController();
   int _selectedPageIndex = 0;
   Correct _correct = Correct.none;
@@ -83,11 +85,13 @@ class _DoQuizPageState extends State<DoQuizPage> {
         .toList();
     filteredTranslations.shuffle();
     setState(() {
-      quizWords = filteredTranslations.sublist(0, numberOfQuizWords);
+      quizWords = filteredTranslations.sublist(0, min(numberOfQuizWords, filteredTranslations.length));
+      numberOfQuizWords =  quizWords.length;
     });
   }
 
   Future<void> _check(int index) async {
+    if (index >= numberOfQuizWords) return;
     Translation quizWord = quizWords[index];
     setState(() {
       if (_inputController.text == quizWord.translation) {
