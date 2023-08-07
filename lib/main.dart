@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:translate_save_and_list/database/database_provider.dart';
+import 'package:translate_save_and_list/pages/list_page.dart';
 import 'package:translate_save_and_list/pages/translation_page.dart';
+import 'package:flutter/widgets.dart';
 
-void main() {
+void main() async {
+  // Avoid errors caused by flutter upgrade.
+  // Importing 'package:flutter/widgets.dart' is required.
+  WidgetsFlutterBinding.ensureInitialized();
+  // Open the database and store the reference.
+  await DatabaseProvider().createDatabase();
   runApp(const MyApp());
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -36,14 +46,13 @@ class _MyHomePageState extends State<MyHomePage> {
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
     TranslationPage(),
-    Text(
-      'Index 1: Business',
-      style: optionStyle,
+    Center(
+      child: Text(
+        'Quiz',
+        style: optionStyle,
+      ),
     ),
-    Text(
-      'Index 2: School',
-      style: optionStyle,
-    ),
+    ListPage()
   ];
 
   late PageController _pageController;

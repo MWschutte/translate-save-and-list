@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
+import 'package:translate_save_and_list/database/database_provider.dart';
 import 'package:translate_save_and_list/models/Translation.dart';
 import 'package:translate_save_and_list/pages/select_language_page.dart';
 
@@ -131,14 +132,18 @@ class _TranslationPageState extends State<TranslationPage>  with AutomaticKeepAl
   void _handleTranslation(String value) {
     _translationController.text = value;
     Translation newWord = Translation(
+        id: DateTime.now().millisecondsSinceEpoch,
         sourceLanguage: sourceLanguage,
         targetLanguage: targetLanguage,
         source: _inputController.text,
-        translation: value);
+        translation: value,
+        dateTime: DateTime.now());
     setState(() {
       sessionWords.add(newWord);
     });
+    DatabaseProvider().insertTranslation(newWord);
   }
+
 
   @override
   bool get wantKeepAlive => true;
