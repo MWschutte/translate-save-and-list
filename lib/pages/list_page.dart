@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 import 'package:translate_save_and_list/database/database_provider.dart';
 import 'package:translate_save_and_list/models/Translation.dart';
+import 'package:translate_save_and_list/models/language_pair.dart';
 
 class ListPage extends StatefulWidget {
   const ListPage({super.key});
@@ -12,25 +12,51 @@ class ListPage extends StatefulWidget {
 
 class _ListPageState extends State<ListPage> {
   List<Translation> translations = [];
+  List<LanguagePair> languagePairs = [];
 
   @override
   void initState() {
-    fetchTranslations();
+    fetchData();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: translations.length,
-      prototypeItem: const ListTile(
-        title: Text('translation'),
-      ),
-      itemBuilder: (context, index) {
-        return TranslationListTile(translation: translations[index]);
-      },
-    );
+    return CustomScrollView(slivers: _buildSlivers());
   }
+
+  List<Widget> _buildSlivers () {
+    List<Widget> slivers = [];
+    for (LanguagePair languagePair in languagePairs) {
+      slivers.add(SliverAppBar(
+        pinned: true,
+        toolbarHeight: 30,
+        title: Text('${languagePair.sourceLanguage.name} - ${languagePair.targetLanguage.name}'),
+      ));
+      List<Translation> filteredList = translations.where((translation) => translation.sourceLanguage == languagePair.sourceLanguage && translation.targetLanguage == languagePair.targetLanguage).toList();
+      slivers.add(
+          SliverList(
+              delegate: SliverChildBuilderDelegate(childCount: filteredList.length,
+                      (context, index) {
+                    return TranslationListTile(translation: filteredList[index]);
+                  }))
+      );
+    }
+    return slivers;
+  }
+
+
+
+  void fetchData() {
+    fetchLanguagePairs();
+    fetchTranslations();
+  }
+
+  Future<void> fetchLanguagePairs() => DatabaseProvider()
+      .listLanguagePairs()
+      .then((fetchedLanguagePairs) => setState(() {
+            languagePairs = fetchedLanguagePairs;
+          }));
 
   Future<void> fetchTranslations() => DatabaseProvider()
       .listTranslations()
@@ -50,10 +76,16 @@ class TranslationListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(translation.source),
-      leading: Text('${translation.sourceLanguage.bcpCode} ~ ${translation.targetLanguage.bcpCode}'),
-      subtitle: Text(translation.dateTime.toString()),
-      trailing: Text(translation.translation),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(translation.source,
+              style: Theme.of(context).textTheme.bodyLarge),
+          Text(translation.translation,
+              style: Theme.of(context).textTheme.bodyLarge)
+        ],
+      ),
+      // trailing: Text('${translation.sourceLanguage.bcpCode} ~ ${translation.targetLanguage.bcpCode}'),
     );
   }
 }

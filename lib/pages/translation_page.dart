@@ -13,7 +13,8 @@ class TranslationPage extends StatefulWidget {
   State<TranslationPage> createState() => _TranslationPageState();
 }
 
-class _TranslationPageState extends State<TranslationPage>  with AutomaticKeepAliveClientMixin {
+class _TranslationPageState extends State<TranslationPage>
+    with AutomaticKeepAliveClientMixin {
   final TextEditingController _translationController = TextEditingController();
   final TextEditingController _inputController = TextEditingController();
   TranslateLanguage sourceLanguage = TranslateLanguage.dutch;
@@ -48,71 +49,66 @@ class _TranslationPageState extends State<TranslationPage>  with AutomaticKeepAl
     return CustomScrollView(
       slivers: [
         SliverAppBar(
-          floating: true,
-          pinned: true,
-          collapsedHeight: 180,
-          expandedHeight: 350,
-          flexibleSpace: Material(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Spacer(),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ChangeLanguageButton(
-                          onLanguageSelect: (newLanguage) =>
-                              setState(() {
-                                sourceLanguage = newLanguage;
-                                buildDeviceTranslator();
-                              }),
-                          sourceLanguage: sourceLanguage),
-                      IconButton(
-                          onPressed: () => setState(() {
-                            TranslateLanguage temp = targetLanguage;
-                            targetLanguage = sourceLanguage;
-                            sourceLanguage = temp;
-                            buildDeviceTranslator();
-                          }),
-                          icon: const Icon(Icons.swap_horiz)),
-                      ChangeLanguageButton(
-                          sourceLanguage: targetLanguage,
-                          onLanguageSelect: (newLanguage) =>
-                              setState(() {
-                                targetLanguage = newLanguage;
-                                buildDeviceTranslator();
-                              }))
-                    ]),
-                const Divider(),
-                TextField(
-                    controller: _inputController,
-                    onChanged: _translateText,
-                    style: Theme.of(context).textTheme.titleLarge,
-                    decoration: const InputDecoration(
-                      hintText: "Enter text",
-                      contentPadding: EdgeInsets.all(8),
-                    )),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-                  child: TextField(
+            floating: true,
+            pinned: true,
+            collapsedHeight: 180,
+            expandedHeight: 350,
+            flexibleSpace: Material(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                  const Spacer(),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ChangeLanguageButton(
+                            onLanguageSelect: (newLanguage) => setState(() {
+                                  sourceLanguage = newLanguage;
+                                  buildDeviceTranslator();
+                                }),
+                            sourceLanguage: sourceLanguage),
+                        IconButton(
+                            onPressed: () => setState(() {
+                                  TranslateLanguage temp = targetLanguage;
+                                  targetLanguage = sourceLanguage;
+                                  sourceLanguage = temp;
+                                  buildDeviceTranslator();
+                                }),
+                            icon: const Icon(Icons.swap_horiz)),
+                        ChangeLanguageButton(
+                            sourceLanguage: targetLanguage,
+                            onLanguageSelect: (newLanguage) => setState(() {
+                                  targetLanguage = newLanguage;
+                                  buildDeviceTranslator();
+                                }))
+                      ]),
+                  const Divider(),
+                  TextField(
+                      controller: _inputController,
+                      onChanged: _translateText,
                       style: Theme.of(context).textTheme.titleLarge,
-                      controller: _translationController,
                       decoration: const InputDecoration(
+                        hintText: "Enter text",
                         contentPadding: EdgeInsets.all(8),
-                      ),
-                      readOnly: true),
-                )
-              ],
-            ),
-          ),
-        ),
+                      )),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+                    child: TextField(
+                        style: Theme.of(context).textTheme.titleLarge,
+                        controller: _translationController,
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.all(8),
+                        ),
+                        readOnly: true),
+                  )
+                ]))),
         SliverList(
             delegate:
-            SliverChildBuilderDelegate(childCount: sessionWords.length,
+                SliverChildBuilderDelegate(childCount: sessionWords.length,
                     (BuildContext context, int pdIndex) {
-                  return HistoryListTile(
-                      translation: sessionWords[sessionWords.length - 1 - pdIndex]);
-                }))
+          return HistoryListTile(
+              translation: sessionWords[sessionWords.length - 1 - pdIndex]);
+        }))
       ],
     );
   }
@@ -144,7 +140,6 @@ class _TranslationPageState extends State<TranslationPage>  with AutomaticKeepAl
     DatabaseProvider().insertTranslation(newWord);
   }
 
-
   @override
   bool get wantKeepAlive => true;
 }
@@ -160,8 +155,10 @@ class HistoryListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        leading: Text(translation.source, style: Theme.of(context).textTheme.bodyLarge),
-        trailing: Text(translation.translation, style: Theme.of(context).textTheme.bodyLarge));
+        leading: Text(translation.source,
+            style: Theme.of(context).textTheme.bodyLarge),
+        trailing: Text(translation.translation,
+            style: Theme.of(context).textTheme.bodyLarge));
   }
 }
 
@@ -179,12 +176,12 @@ class ChangeLanguageButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
         onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => SelectLanguagePage(
-                  selectedLanguage: sourceLanguage,
-                  onLanguageSelect: onLanguageSelect)),
-        ),
+              context,
+              MaterialPageRoute(
+                  builder: (context) => SelectLanguagePage(
+                      selectedLanguage: sourceLanguage,
+                      onLanguageSelect: onLanguageSelect)),
+            ),
         child: Row(children: [
           Text(sourceLanguage.name),
           const Icon(Icons.expand_more)

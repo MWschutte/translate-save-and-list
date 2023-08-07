@@ -1,6 +1,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:translate_save_and_list/models/Translation.dart';
+import 'package:translate_save_and_list/models/language_pair.dart';
 
 class DatabaseProvider {
   Database? database;
@@ -58,4 +59,16 @@ class DatabaseProvider {
       return Translation.fromMap(maps[i]);
     });
   }
+
+  Future<List<LanguagePair>> listLanguagePairs() async {
+  Database? db = database;
+  if (db == null) return [];
+  final List<Map<String, dynamic>> maps = await db.query(_translations, columns: ['sourceLanguage', 'targetLanguage'], distinct: true);
+
+  // Convert the List<Map<String, dynamic> into a List<Dog>.
+  return List.generate(maps.length, (i) {
+  return LanguagePair.fromMap(maps[i]);
+  });
+}
+
 }
