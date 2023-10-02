@@ -71,4 +71,11 @@ class DatabaseProvider {
   });
 }
 
+  Future<bool> deleteTranslation(Translation translation) async {
+    Database? db = database;
+    if (db == null) return false;
+    int deleted = await db.delete(_translations, where: 'id = ?', whereArgs: [translation.id]);
+    return deleted == 1;
+  }
+
 }
