@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:translate_save_and_list/models/translation.dart';
@@ -76,6 +78,28 @@ class DatabaseProvider {
     if (db == null) return false;
     int deleted = await db.delete(_translations, where: 'id = ?', whereArgs: [translation.id]);
     return deleted == 1;
+  }
+
+  Future<List<Translation>> getNumberOfWords(int number, LanguagePair selectedLanguage) async {
+    List<Translation> translations = await getShuffledTranslations(selectedLanguage);
+    translations = translations.sublist(
+        0, min(number, translations.length));
+    return translations;
+  }
+
+  Future<List<Translation>> getShuffledTranslations(LanguagePair selectedLanguage) async {
+    List<Translation> translations =
+    await listTranslations();
+    translations = translations
+        .where((element) => _sameAsSelectedLanguagePair(element, selectedLanguage))
+        .toList();
+    translations.shuffle();
+    return translations;
+  }
+
+  bool _sameAsSelectedLanguagePair(Translation element, LanguagePair selectedLanguage) {
+    return element.targetLanguage == selectedLanguage.targetLanguage &&
+        element.sourceLanguage == selectedLanguage.sourceLanguage;
   }
 
 }

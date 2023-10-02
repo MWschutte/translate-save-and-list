@@ -1,16 +1,17 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:translate_save_and_list/database/database_provider.dart';
+import 'package:translate_save_and_list/enums.dart';
 import 'package:translate_save_and_list/models/language_pair.dart';
 import 'package:translate_save_and_list/models/translation.dart';
 
 enum Correct { correct, incorrect, none }
 
 class DoQuizPage extends StatefulWidget {
-  const DoQuizPage({required this.languagePair, super.key});
+  const DoQuizPage(
+      {required this.languagePair, required this.quizType, super.key});
 
   final LanguagePair languagePair;
+  final QuizType quizType;
 
   @override
   State<DoQuizPage> createState() => _DoQuizPageState();
@@ -60,15 +61,14 @@ class _DoQuizPageState extends State<DoQuizPage> {
                 quizWords[i].source,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              TextField(
-                  controller: _inputController,
-                  style: TextStyle(color: _textColor),
-                  decoration: InputDecoration(
-                      hintText: "Enter solution",
-                      contentPadding: const EdgeInsets.all(10),
-                      suffix: _correct != Correct.none
-                          ? Icon(_correct == Correct.correct ? Icons.check : Icons.close, color: _textColor)
-                          : null)),
+              switch (widget.quizType) {
+                QuizType.selectWord =>
+                  SelectWord(languagePair: widget.languagePair),
+                QuizType.typeWord => TypeWord(
+                    inputController: _inputController,
+                    textColor: _textColor,
+                    correct: _correct)
+              },
               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                 Text('$_selectedPageIndex/$numberOfQuizWords'),
                 TextButton(
@@ -78,15 +78,10 @@ class _DoQuizPageState extends State<DoQuizPage> {
   }
 
   Future<void> _loadQuizWords() async {
-    List<Translation> translations =
-        await DatabaseProvider().listTranslations();
-    List<Translation> filteredTranslations = translations
-        .where((element) => _sameAsSelectedLanguagePair(element))
-        .toList();
-    filteredTranslations.shuffle();
+    quizWords = await DatabaseProvider()
+        .getNumberOfWords(numberOfQuizWords, widget.languagePair);
     setState(() {
-      quizWords = filteredTranslations.sublist(0, min(numberOfQuizWords, filteredTranslations.length));
-      numberOfQuizWords =  quizWords.length;
+      numberOfQuizWords = quizWords.length;
     });
   }
 
@@ -112,10 +107,98 @@ class _DoQuizPageState extends State<DoQuizPage> {
       _textColor = Colors.black;
     });
   }
+}
 
-  bool _sameAsSelectedLanguagePair(Translation element) {
-    LanguagePair selectedLanguage = widget.languagePair;
-    return element.targetLanguage == selectedLanguage.targetLanguage &&
-        element.sourceLanguage == selectedLanguage.sourceLanguage;
+class TypeWord extends StatelessWidget {
+  const TypeWord({
+    super.key,
+    required TextEditingController inputController,
+    required Color textColor,
+    required Correct correct,
+  })  : _inputController = inputController,
+        _textColor = textColor,
+        _correct = correct;
+
+  final TextEditingController _inputController;
+  final Color _textColor;
+  final Correct _correct;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+        controller: _inputController,
+        style: TextStyle(color: _textColor),
+        decoration: InputDecoration(
+            hintText: "Enter solution",
+            contentPadding: const EdgeInsets.all(10),
+            suffix: _correct != Correct.none
+                ? Icon(_correct == Correct.correct ? Icons.check : Icons.close,
+                    color: _textColor)
+                : null));
+  }
+}
+
+class SelectWord extends StatefulWidget {
+  const SelectWord({required this.languagePair, super.key});
+
+  final LanguagePair languagePair;
+
+  @override
+  State<SelectWord> createState() => _SelectWordState();
+}
+
+class _SelectWordState extends State<SelectWord> {
+  int numberOfChoices = 5;
+  List<String> choices = [];
+  String? selectedItem;
+
+  @override
+  void initState() {
+    _loadChoices();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+            constraints: const BoxConstraints(maxWidth: 300),
+            child: Column(children: [
+              Container(
+                  height: 90,
+                  decoration: const BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(width: 1, color: Colors.black))),
+                  child: Row(
+                    children: [
+                      if(selectedItem != null)
+                          ActionChip(
+                              label: Text(selectedItem ?? ''),
+                              onPressed: () => setState(() {
+                                    selectedItem = null;
+                                  })),
+                    ],
+                  )),
+              const SizedBox(height: 25),
+              Wrap(
+                spacing: 5,
+                children: choices
+                    .map((name) => ActionChip(
+                        label: Text(name),
+                        onPressed: name != selectedItem ? () => setState(() {
+                              selectedItem = name;
+                            }): null))
+                    .toList(),
+              )
+            ])));
+  }
+
+  Future<void> _loadChoices() async {
+    List<Translation> translations = await DatabaseProvider()
+        .getNumberOfWords(numberOfChoices, widget.languagePair);
+    setState(() {
+      choices = translations.map((Translation t) => t.translation).toList();
+    });
   }
 }
