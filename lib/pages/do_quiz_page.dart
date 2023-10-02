@@ -54,27 +54,34 @@ class _DoQuizPageState extends State<DoQuizPage> {
   }
 
   List<Widget> _widgetOptions() {
-    return List.generate(
-        quizWords.length,
-        (i) => Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text(
-                quizWords[i].source,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              switch (widget.quizType) {
-                QuizType.selectWord =>
-                  SelectWord(languagePair: widget.languagePair),
-                QuizType.typeWord => TypeWord(
-                    inputController: _inputController,
-                    textColor: _textColor,
-                    correct: _correct)
-              },
-              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                Text('$_selectedPageIndex/$numberOfQuizWords'),
-                TextButton(
-                    onPressed: () => _check(i), child: const Text('check'))
-              ]),
-            ]));
+    return List.generate(quizWords.length, (i) {
+      Translation t = quizWords[i];
+      return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            t.source,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+        switch (widget.quizType) {
+          QuizType.selectWord => SelectWord(
+              correctWord: t.translation,
+              languagePair: widget.languagePair,
+              correct: _correct,
+              textColor: _textColor,
+              inputController: _inputController),
+          QuizType.typeWord => TypeWord(
+              inputController: _inputController,
+              textColor: _textColor,
+              correct: _correct)
+        },
+        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+          Text('$_selectedPageIndex/$numberOfQuizWords'),
+          TextButton(onPressed: () => _check(i), child: const Text('check'))
+        ]),
+      ]);
+    });
   }
 
   Future<void> _loadQuizWords() async {
@@ -139,8 +146,18 @@ class TypeWord extends StatelessWidget {
 }
 
 class SelectWord extends StatefulWidget {
-  const SelectWord({required this.languagePair, super.key});
+  const SelectWord(
+      {required this.correctWord,
+      required this.inputController,
+      required this.textColor,
+      required this.correct,
+      required this.languagePair,
+      super.key});
 
+  final String correctWord;
+  final TextEditingController inputController;
+  final Color textColor;
+  final Correct correct;
   final LanguagePair languagePair;
 
   @override
@@ -171,13 +188,30 @@ class _SelectWordState extends State<SelectWord> {
                       border: Border(
                           bottom: BorderSide(width: 1, color: Colors.black))),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if(selectedItem != null)
-                          ActionChip(
-                              label: Text(selectedItem ?? ''),
-                              onPressed: () => setState(() {
-                                    selectedItem = null;
-                                  })),
+                      if (selectedItem != null)
+                        Expanded(
+                          child: Wrap(
+                            children: [
+                              ActionChip(
+                                  side: BorderSide(color: widget.textColor),
+                                  label: Text(selectedItem ?? '',
+                                      style:
+                                          TextStyle(color: widget.textColor)),
+                                  onPressed: () => setState(() {
+                                        selectedItem = null;
+                                        widget.inputController.text = '';
+                                      })),
+                            ],
+                          ),
+                        ),
+                      if (widget.correct != Correct.none)
+                        Icon(
+                            widget.correct == Correct.correct
+                                ? Icons.check
+                                : Icons.close,
+                            color: widget.textColor)
                     ],
                   )),
               const SizedBox(height: 25),
@@ -186,9 +220,12 @@ class _SelectWordState extends State<SelectWord> {
                 children: choices
                     .map((name) => ActionChip(
                         label: Text(name),
-                        onPressed: name != selectedItem ? () => setState(() {
-                              selectedItem = name;
-                            }): null))
+                        onPressed: name != selectedItem
+                            ? () => setState(() {
+                                  selectedItem = name;
+                                  widget.inputController.text = name;
+                                })
+                            : null))
                     .toList(),
               )
             ])));
@@ -196,9 +233,14 @@ class _SelectWordState extends State<SelectWord> {
 
   Future<void> _loadChoices() async {
     List<Translation> translations = await DatabaseProvider()
-        .getNumberOfWords(numberOfChoices, widget.languagePair);
+        .getNumberOfWords(numberOfChoices , widget.languagePair);
     setState(() {
       choices = translations.map((Translation t) => t.translation).toList();
+      if (!choices.contains(widget.correctWord)) {
+        choices.removeAt(0);
+        choices.add(widget.correctWord);
+      }
+      choices.shuffle();
     });
   }
 }
