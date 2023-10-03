@@ -15,3 +15,9 @@ extension QuizTypeExtension on QuizType {
     }
   }
 }
+
+
+enum LanguagePreference {
+  source,
+  target
+}

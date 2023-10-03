@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:translate_save_and_list/database/database_provider.dart';
+import 'package:translate_save_and_list/enums.dart';
 import 'package:translate_save_and_list/models/translation.dart';
 import 'package:translate_save_and_list/pages/select_language_page.dart';
 import 'package:translate_save_and_list/widgets/history_list_tile.dart';
@@ -30,7 +32,46 @@ class _TranslationPageState extends State<TranslationPage>
   void initState() {
     _translationController.text = "Translation";
     buildDeviceTranslator();
+    _loadLanguageSharedPreferences();
     super.initState();
+  }
+
+  void _loadLanguageSharedPreferences() {
+  _getSourceSharedPreference();
+  _getTargetSharedPreference();
+}
+
+  Future<void> _getSourceSharedPreference() async {
+    TranslateLanguage? language =
+        await _getLanguageSharedPreference(LanguagePreference.source);
+    if (language != null) {
+      setState(() {
+        sourceLanguage = language;
+      });
+    }
+  }
+
+  Future<void> _getTargetSharedPreference() async {
+    TranslateLanguage? language =
+    await _getLanguageSharedPreference(LanguagePreference.target);
+    if (language != null) {
+      setState(() {
+        targetLanguage = language;
+      });
+    }
+  }
+
+  Future<TranslateLanguage?> _getLanguageSharedPreference(
+      LanguagePreference languageTarget) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? languageCode = prefs.getString(languageTarget.name);
+    if (languageCode != null) return BCP47Code.fromRawValue(languageCode);
+    return null;
+  }
+
+  Future<void> _saveLanguagePreference(LanguagePreference languageTarget, TranslateLanguage language) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(languageTarget.name, language.bcpCode);
   }
 
   void buildDeviceTranslator() {
@@ -65,6 +106,7 @@ class _TranslationPageState extends State<TranslationPage>
                           onLanguageSelect: (newLanguage) => setState(() {
                                 sourceLanguage = newLanguage;
                                 buildDeviceTranslator();
+                                _saveLanguagePreference(LanguagePreference.source, newLanguage);
                               }),
                           sourceLanguage: sourceLanguage),
                       IconButton(
@@ -80,7 +122,8 @@ class _TranslationPageState extends State<TranslationPage>
                           onLanguageSelect: (newLanguage) => setState(() {
                                 targetLanguage = newLanguage;
                                 buildDeviceTranslator();
-                              }))
+                                _saveLanguagePreference(LanguagePreference.target, newLanguage);
+                          }))
                     ]),
                 const Divider(),
                 TextField(
@@ -106,11 +149,14 @@ class _TranslationPageState extends State<TranslationPage>
       SliverList(
           delegate: SliverChildBuilderDelegate(childCount: sessionWords.length,
               (BuildContext context, int pdIndex) {
-            Translation translation = sessionWords[sessionWords.length -1 -pdIndex];
+        Translation translation =
+            sessionWords[sessionWords.length - 1 - pdIndex];
         return HistoryListTile(
-            translation: translation,onDismissed: (_) {
+            translation: translation,
+            onDismissed: (_) {
               sessionWords.remove(translation);
-              DatabaseProvider().deleteTranslation(translation);});
+              DatabaseProvider().deleteTranslation(translation);
+            });
       }))
     ]);
   }
