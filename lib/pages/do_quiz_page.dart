@@ -24,7 +24,8 @@ class _DoQuizPageState extends State<DoQuizPage> {
   int _selectedPageIndex = 0;
   Correct _correct = Correct.none;
   final TextEditingController _inputController = TextEditingController();
-  Color _textColor = Colors.black;
+  Color? _textColor;
+  Color? _outlineColor;
 
   @override
   void initState() {
@@ -40,6 +41,10 @@ class _DoQuizPageState extends State<DoQuizPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_textColor == null)
+      _textColor = Theme.of(context).colorScheme.secondary;
+    if (_outlineColor == null)
+      _outlineColor = Theme.of(context).colorScheme.outline;
     return Scaffold(
         appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -70,6 +75,7 @@ class _DoQuizPageState extends State<DoQuizPage> {
               languagePair: widget.languagePair,
               correct: _correct,
               textColor: _textColor,
+              outlineColor: _outlineColor,
               inputController: _inputController),
           QuizType.typeWord => TypeWord(
               inputController: _inputController,
@@ -99,9 +105,11 @@ class _DoQuizPageState extends State<DoQuizPage> {
       if (_inputController.text == quizWord.translation) {
         _correct = Correct.correct;
         _textColor = Colors.lightGreenAccent;
+        _outlineColor = Colors.lightGreenAccent;
       } else {
         _correct = Correct.incorrect;
         _textColor = Colors.redAccent;
+        _outlineColor = Colors.redAccent;
         _inputController.text = quizWord.translation;
       }
     });
@@ -111,36 +119,34 @@ class _DoQuizPageState extends State<DoQuizPage> {
       _pageController.jumpToPage(_selectedPageIndex);
       _correct = Correct.none;
       _inputController.text = '';
-      _textColor = Colors.black;
+      _textColor = Theme.of(context).colorScheme.secondary;
+      _outlineColor = Theme.of(context).colorScheme.outline;
     });
   }
 }
 
 class TypeWord extends StatelessWidget {
-  const TypeWord({
-    super.key,
-    required TextEditingController inputController,
-    required Color textColor,
-    required Correct correct,
-  })  : _inputController = inputController,
-        _textColor = textColor,
-        _correct = correct;
+  const TypeWord(
+      {super.key,
+      required this.inputController,
+      required this.correct,
+      this.textColor});
 
-  final TextEditingController _inputController;
-  final Color _textColor;
-  final Correct _correct;
+  final TextEditingController inputController;
+  final Color? textColor;
+  final Correct correct;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
-        controller: _inputController,
-        style: TextStyle(color: _textColor),
+        controller: inputController,
+        style: TextStyle(color: textColor),
         decoration: InputDecoration(
             hintText: "Enter solution",
             contentPadding: const EdgeInsets.all(10),
-            suffix: _correct != Correct.none
-                ? Icon(_correct == Correct.correct ? Icons.check : Icons.close,
-                    color: _textColor)
+            suffix: correct != Correct.none
+                ? Icon(correct == Correct.correct ? Icons.check : Icons.close,
+                    color: textColor)
                 : null));
   }
 }
@@ -152,11 +158,13 @@ class SelectWord extends StatefulWidget {
       required this.textColor,
       required this.correct,
       required this.languagePair,
+        this.outlineColor,
       super.key});
 
   final String correctWord;
   final TextEditingController inputController;
-  final Color textColor;
+  final Color? textColor;
+  final Color? outlineColor;
   final Correct correct;
   final LanguagePair languagePair;
 
@@ -184,9 +192,9 @@ class _SelectWordState extends State<SelectWord> {
             child: Column(children: [
               Container(
                   height: 90,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                       border: Border(
-                          bottom: BorderSide(width: 1, color: Colors.black))),
+                          bottom: BorderSide(width: 1, color: Theme.of(context).colorScheme.outline))),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -195,7 +203,11 @@ class _SelectWordState extends State<SelectWord> {
                           child: Wrap(
                             children: [
                               ActionChip(
-                                  side: BorderSide(color: widget.textColor),
+                                  side: BorderSide(
+                                      color: widget.outlineColor ??
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .outline),
                                   label: Text(selectedItem ?? '',
                                       style:
                                           TextStyle(color: widget.textColor)),
@@ -233,7 +245,7 @@ class _SelectWordState extends State<SelectWord> {
 
   Future<void> _loadChoices() async {
     List<Translation> translations = await DatabaseProvider()
-        .getNumberOfWords(numberOfChoices , widget.languagePair);
+        .getNumberOfWords(numberOfChoices, widget.languagePair);
     setState(() {
       choices = translations.map((Translation t) => t.translation).toList();
       if (!choices.contains(widget.correctWord)) {
