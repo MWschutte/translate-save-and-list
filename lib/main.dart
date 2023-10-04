@@ -14,11 +14,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Open the database and store the reference.
   await DatabaseProvider().createDatabase();
-  runApp(const MyApp());
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  int? themeModeIndex = prefs.getInt(themeModeSharedPreferenceKey);
+  ThemeMode themeMode = themeModeIndex == null ? ThemeMode.system: ThemeMode.values[themeModeIndex];
+  runApp(MyApp(initialTheme: themeMode));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({required this.initialTheme, super.key});
+  final ThemeMode initialTheme;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -29,7 +33,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    _loadThemeModeFromSharedPreferences();
+    _themeMode = widget.initialTheme;
     super.initState();
   }
 
@@ -66,20 +70,6 @@ class _MyAppState extends State<MyApp> {
   Future<void> _saveThemePreference(ThemeMode themeMode) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt(themeModeSharedPreferenceKey, themeMode.index);
-  }
-
-  Future<void> _loadThemeModeFromSharedPreferences() async {
-    ThemeMode? themeMode = await _getThemeModePreference();
-    if (themeMode!= null) {
-      _themeMode = themeMode;
-    }
-  }
-
-  Future<ThemeMode?> _getThemeModePreference() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? themeModeIndex = prefs.getInt(themeModeSharedPreferenceKey);
-    if (themeModeIndex == null) return null;
-    return ThemeMode.values[themeModeIndex];
   }
 
   ThemeMode get getTheme => _themeMode;
