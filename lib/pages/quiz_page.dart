@@ -22,31 +22,24 @@ class _QuizPageState extends State<QuizPage> with LanguagePairMixin {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-          DropdownButton<LanguagePair>(
-            hint: const Text("Select language pair"),
-            value: selectedLanguagePair,
-            icon: const Icon(Icons.expand_more),
-            elevation: 16,
-            underline: Container(
-              height: 2,
-              color: Colors.deepPurpleAccent,
-            ),
-            onChanged: (LanguagePair? value) {
+          DropdownMenu<LanguagePair>(
+            width: 180,
+            hintText: "Select language pair",
+            dropdownMenuEntries: languagePairs
+                .map((e) => DropdownMenuEntry(
+                    label:
+                        '${e.sourceLanguage.name} - ${e.targetLanguage.name}',
+                    value: e))
+                .toList(),
+            onSelected: (LanguagePair? value) {
               if (value != null) {
                 setState(() {
                   selectedLanguagePair = value;
                 });
               }
             },
-            items: languagePairs
-                .map<DropdownMenuItem<LanguagePair>>((LanguagePair value) {
-              return DropdownMenuItem<LanguagePair>(
-                value: value,
-                child: Text(
-                    '${value.sourceLanguage.name} - ${value.targetLanguage.name}'),
-              );
-            }).toList(),
           ),
+          const SizedBox(height: 15),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -85,8 +78,10 @@ class _QuizPageState extends State<QuizPage> with LanguagePairMixin {
       return;
     }
 
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => DoQuizPage(languagePair: slp, quizType: selectedQuizType)));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                DoQuizPage(languagePair: slp, quizType: selectedQuizType)));
   }
 }
-

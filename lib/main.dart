@@ -4,8 +4,6 @@ import 'package:translate_save_and_list/database/database_provider.dart';
 import 'package:translate_save_and_list/pages/quiz_page.dart';
 import 'package:translate_save_and_list/pages/list_page.dart';
 import 'package:translate_save_and_list/pages/translation_page.dart';
-import 'package:flutter/widgets.dart';
-
 import 'enums.dart';
 
 void main() async {
@@ -16,12 +14,15 @@ void main() async {
   await DatabaseProvider().createDatabase();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   int? themeModeIndex = prefs.getInt(themeModeSharedPreferenceKey);
-  ThemeMode themeMode = themeModeIndex == null ? ThemeMode.system: ThemeMode.values[themeModeIndex];
+  ThemeMode themeMode = themeModeIndex == null
+      ? ThemeMode.system
+      : ThemeMode.values[themeModeIndex];
   runApp(MyApp(initialTheme: themeMode));
 }
 
 class MyApp extends StatefulWidget {
   const MyApp({required this.initialTheme, super.key});
+
   final ThemeMode initialTheme;
 
   @override
@@ -158,22 +159,23 @@ class _MyHomePageState extends State<MyHomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Color theme', style: Theme.of(context).textTheme.labelLarge),
+              Text('Color theme',
+                  style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(width: 10),
-              Icon(_darkModeEnabled()? Icons.dark_mode_outlined: Icons.light_mode_outlined)
+              Icon(_darkModeEnabled()
+                  ? Icons.dark_mode_outlined
+                  : Icons.light_mode_outlined)
             ],
           ),
           const ChangeTheme()
         ])));
   }
 
-  bool _darkModeEnabled(){
+  bool _darkModeEnabled() {
     _MyAppState? appState = _MyAppState.of(context);
     ThemeMode theme = appState?.getTheme ?? ThemeMode.system;
-    if (theme==ThemeMode.system) {
-      Brightness brightness = MediaQuery
-          .of(context)
-          .platformBrightness;
+    if (theme == ThemeMode.system) {
+      Brightness brightness = MediaQuery.of(context).platformBrightness;
       return brightness == Brightness.dark;
     }
     return theme == ThemeMode.dark;
