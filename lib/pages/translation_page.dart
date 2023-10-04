@@ -37,9 +37,9 @@ class _TranslationPageState extends State<TranslationPage>
   }
 
   void _loadLanguageSharedPreferences() {
-  _getSourceSharedPreference();
-  _getTargetSharedPreference();
-}
+    _getSourceSharedPreference();
+    _getTargetSharedPreference();
+  }
 
   Future<void> _getSourceSharedPreference() async {
     TranslateLanguage? language =
@@ -53,7 +53,7 @@ class _TranslationPageState extends State<TranslationPage>
 
   Future<void> _getTargetSharedPreference() async {
     TranslateLanguage? language =
-    await _getLanguageSharedPreference(LanguagePreference.target);
+        await _getLanguageSharedPreference(LanguagePreference.target);
     if (language != null) {
       setState(() {
         targetLanguage = language;
@@ -69,7 +69,8 @@ class _TranslationPageState extends State<TranslationPage>
     return null;
   }
 
-  Future<void> _saveLanguagePreference(LanguagePreference languageTarget, TranslateLanguage language) async {
+  Future<void> _saveLanguagePreference(
+      LanguagePreference languageTarget, TranslateLanguage language) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(languageTarget.name, language.bcpCode);
   }
@@ -108,7 +109,8 @@ class _TranslationPageState extends State<TranslationPage>
                           onLanguageSelect: (newLanguage) => setState(() {
                                 sourceLanguage = newLanguage;
                                 buildDeviceTranslator();
-                                _saveLanguagePreference(LanguagePreference.source, newLanguage);
+                                _saveLanguagePreference(
+                                    LanguagePreference.source, newLanguage);
                               }),
                           sourceLanguage: sourceLanguage),
                       IconButton(
@@ -124,18 +126,21 @@ class _TranslationPageState extends State<TranslationPage>
                           onLanguageSelect: (newLanguage) => setState(() {
                                 targetLanguage = newLanguage;
                                 buildDeviceTranslator();
-                                _saveLanguagePreference(LanguagePreference.target, newLanguage);
-                          }))
+                                _saveLanguagePreference(
+                                    LanguagePreference.target, newLanguage);
+                              }))
                     ]),
                 const Divider(),
                 TextField(
                     controller: _inputController,
                     onChanged: _translateText,
                     style: Theme.of(context).textTheme.titleLarge,
-                    decoration: const InputDecoration(
-                      hintText: "Enter text",
-                      contentPadding: EdgeInsets.all(8),
-                    )),
+                    decoration: InputDecoration(
+                        hintText: "Enter text",
+                        contentPadding: EdgeInsets.all(8),
+                        suffix: IconButton(
+                            onPressed: () => _inputController.text = '',
+                            icon: const Icon(Icons.close)))),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                   child: TextField(
