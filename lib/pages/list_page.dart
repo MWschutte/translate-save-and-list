@@ -26,6 +26,8 @@ class _ListPageState extends State<ListPage> with LanguagePairMixin<ListPage>, T
     for (LanguagePair languagePair in languagePairs) {
       slivers.add(SliverAppBar(
         pinned: true,
+        automaticallyImplyLeading: false,
+        actions: <Widget>[Container()],
         toolbarHeight: 30,
         title: Text('${languagePair.sourceLanguage.name} - ${languagePair.targetLanguage.name}'),
       ));

@@ -90,6 +90,8 @@ class _TranslationPageState extends State<TranslationPage>
     super.build(context);
     return CustomScrollView(slivers: [
       SliverAppBar(
+          automaticallyImplyLeading: false,
+          actions: <Widget>[Container()],
           floating: true,
           pinned: true,
           collapsedHeight: 180,

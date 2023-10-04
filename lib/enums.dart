@@ -1,9 +1,22 @@
 
+// enums
+
 enum QuizType {
   selectWord,
   typeWord
 }
 
+enum LanguagePreference {
+  source,
+  target
+}
+
+
+// Shared preference keys.
+const String themeModeSharedPreferenceKey = 'themeModePreference';
+
+
+// Enum extensions.
 extension QuizTypeExtension on QuizType {
 
   String get displayTitle {
@@ -14,10 +27,4 @@ extension QuizTypeExtension on QuizType {
         return 'Select word';
     }
   }
-}
-
-
-enum LanguagePreference {
-  source,
-  target
 }
